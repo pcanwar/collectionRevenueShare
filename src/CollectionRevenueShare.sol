@@ -89,10 +89,10 @@ contract CollectionRevenueShare is ERC721, ERC721Enumerable, ERC721URIStorage, O
 
     /*
     * @notice: this function runs once the contract deployed
-    * @param  name_symbol_ string is an array of name and symbol of the collection
+    * @param  name_symbol_baseURI string is an array of name, symbol and baseURI of the collection
     * @param  _admain address is the owner of the collection
     * @param  maxSypplyCollection_ uint256 is max sypply of the collection
-    * @param  _privatePriceWei_startTime_ uint256 is an arry of the private price in Wei and private start time stamp
+    * @param  _privatePriceWei_startTime__publicPriceWei_publicstartTime_ uint256 is an arry of the private price in Wei and private start time stamp
     * @param  _publicPriceWei_publicstartTime_ uint256 is an arry of the public pricd in Wei and the public start time stamp
     * @param maxMintPerAddress_ uint256 is how many a wallet address can mint
     * @param baseURI string of the URI
@@ -332,8 +332,6 @@ contract CollectionRevenueShare is ERC721, ERC721Enumerable, ERC721URIStorage, O
 
     }
 
-
-
     /// @dev Set royalty fee for specific token
     /// @param _tokenId The tokenId where to add the royalty
     /// @param _receiver The royalty receiver
@@ -358,7 +356,7 @@ contract CollectionRevenueShare is ERC721, ERC721Enumerable, ERC721URIStorage, O
         _deleteDefaultRoyalty();
     }
 
-        /// @dev Set the royalty for all collection
+    /// @dev Set the royalty for all collection
     /// @param _feeNumerator The fee for collection
     function setDefaultRoyalty(address _receiver, uint96 _feeNumerator)
     onlyOwner external
@@ -366,9 +364,6 @@ contract CollectionRevenueShare is ERC721, ERC721Enumerable, ERC721URIStorage, O
     {
         _setDefaultRoyalty(_receiver, _feeNumerator);
     }
-
-
-
 
 
         // The following functions are overrides required by Solidity.
