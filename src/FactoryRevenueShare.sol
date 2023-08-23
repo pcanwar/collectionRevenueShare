@@ -13,8 +13,8 @@ contract FactoryRevenueShare is Ownable  {
     address [] private nftCollection;
     mapping (address => bool) isMintedCollection;
 
-    event NewCollectionLog(address indexed contracts, address indexed creator,
-    string  [3] name_symbol_baseURI,
+    event NewCollectionLog(address indexed contracts, address indexed creator, address indexed admain, 
+    string  [3] nsbURI_,
     uint256 [2] maxSypplyMintPerAddress, uint256 [4] privatePublicPriceWei, address[] payees, uint256[] shares);
 
     // SaleLogFactory event if there is sale either private or public sales
@@ -48,30 +48,30 @@ contract FactoryRevenueShare is Ownable  {
 
     /*
     * @notice: this function runs for creating a collection
-    * @param  name_symbol_ string is an array of name and symbol of the collection
-    * @param  _admain address is the owner of the collection
-    * @param  maxSypplyCollection_ uint256 is max sypply of the collection
-    * @param  _privatePriceWei_startTime_ uint256 is an arry of the private price in Wei and private start time stamp
-    * @param  _publicPriceWei_publicstartTime_ uint256 is an arry of the public pricd in Wei and the public start time stamp
-    * @param maxMintPerAddress_ uint256 is how many a wallet address can mint
-    * @param baseURI string of the URI
+    * @param  nsbURI_ string is an array of 3 elements name and symbol of the collection and baseURL
+    * @param  _admain address is the owner of the collection 
+    * @param  maxCollMintAddr_ uint256 is an array of 2 elements max sypply of the collection and how many a wallet address can mint
+    * @param  privPriceStart_pubPriceStart_ uint256 is an arry of 4 elements the private price in Wei and private start time stamp
+    * and public pricd in Wei and the public start time stamp
+    * @param payees address is array of the addresses revenue share add 
+    * @param shares uint256 is an array of the revenue assigned the number of shares 
     */
 
-    function createCollection(string [3] calldata name_symbol_baseURI, address _admain,
-    uint256 [2] calldata maxSypplyCollection_maxMintPerAddress_, uint256 [4] calldata _privatePriceWei_startTime__publicPriceWei_publicstartTime_,
+    function createCollection(string [3] calldata nsbURI_, address _admain,
+    uint256 [2] calldata maxCollMintAddr_, uint256 [4] calldata privPriceStart_pubPriceStart_,
     address[] calldata payees, uint256[] calldata shares) external   {
-        require( maxSypplyCollection_maxMintPerAddress_[0] > 0, "It must be nonzero");
+        require( maxCollMintAddr_[0] > 0, "It must be nonzero");
         address payable clone = payable(Clones.clone(nftImp));
         CollectionRevenueShare(clone).initialize(
-            name_symbol_baseURI, _admain, address(this),
-            maxSypplyCollection_maxMintPerAddress_,_privatePriceWei_startTime__publicPriceWei_publicstartTime_, payees, shares);
+            nsbURI_, _admain, address(this),
+            maxCollMintAddr_,privPriceStart_pubPriceStart_, payees, shares);
 
         nftCollection.push(clone);
 
         isMintedCollection[clone] = true;
 
-        emit NewCollectionLog(clone, msg.sender,
-            name_symbol_baseURI, maxSypplyCollection_maxMintPerAddress_, _privatePriceWei_startTime__publicPriceWei_publicstartTime_, payees, shares);
+        emit NewCollectionLog(clone, msg.sender,_admain,
+            nsbURI_, maxCollMintAddr_, privPriceStart_pubPriceStart_, payees, shares);
     }
 
 

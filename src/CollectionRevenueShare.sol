@@ -34,8 +34,6 @@ contract CollectionRevenueShare is ERC721, ERC721Enumerable, ERC721URIStorage, O
     uint256 private publicPriceWei_ ;
     // private price
     uint256 private privatePriceWei_ ;
-    // the admain is the collector
-    address private collector ;
     // max sypply
     uint256 private maxSypplyCollection;
     // active the sale
@@ -89,43 +87,33 @@ contract CollectionRevenueShare is ERC721, ERC721Enumerable, ERC721URIStorage, O
 
     /*
     * @notice: this function runs once the contract deployed
-    * @param  name_symbol_baseURI string is an array of name, symbol and baseURI of the collection
+    * @param  nsbURI_ string is an array of name, symbol and baseURI of the collection
     * @param  _admain address is the owner of the collection
     * @param  maxSypplyCollection_ uint256 is max sypply of the collection
-    * @param  _privatePriceWei_startTime__publicPriceWei_publicstartTime_ uint256 is an arry of the private price in Wei and private start time stamp
+    * @param  privPriceStart_pubPriceStart_ uint256 is an arry of the private price in Wei and private start time stamp
     * @param  _publicPriceWei_publicstartTime_ uint256 is an arry of the public pricd in Wei and the public start time stamp
     * @param maxMintPerAddress_ uint256 is how many a wallet address can mint
     * @param baseURI string of the URI
     */
-    function initialize(string [3] calldata name_symbol_baseURI, address _admain, address _factory,
-    uint256 [2] calldata maxSypplyCollection_maxMintPerAddress_, uint256 [4] calldata _privatePriceWei_startTime__publicPriceWei_publicstartTime_,
+    function initialize(string [3] calldata nsbURI_, address _admain, address _factory,
+    uint256 [2] calldata maxCollMintAddr_, uint256 [4] calldata privPriceStart_pubPriceStart_,
     address[] calldata payees, uint256[] calldata shares) external virtual initializer  {
-            require(timestamp() <= _privatePriceWei_startTime__publicPriceWei_publicstartTime_[3],"public time sale is not correct " );
-            require(_privatePriceWei_startTime__publicPriceWei_publicstartTime_[3] >= _privatePriceWei_startTime__publicPriceWei_publicstartTime_[1],"public time smaller than end time" );
+            require(timestamp() <= privPriceStart_pubPriceStart_[3],"public time sale is not correct " );
+            require(privPriceStart_pubPriceStart_[3] >= privPriceStart_pubPriceStart_[1],"public time smaller than end time" );
             require(_admain != address(0));
-            __ERC721_init(name_symbol_baseURI[0], name_symbol_baseURI[1]);
+            __ERC721_init(nsbURI_[0], nsbURI_[1]);
              __PaymentSplitter_init(payees, shares);
-            maxSypplyCollection = maxSypplyCollection_maxMintPerAddress_[0];
-            _setBaseURI(string(abi.encodePacked(name_symbol_baseURI[2], Strings.toHexString(address(this)),"/")));
+            maxSypplyCollection = maxCollMintAddr_[0];
+            _setBaseURI(string(abi.encodePacked(nsbURI_[2], Strings.toHexString(address(this)),"/")));
             __Ownable_init(_admain);
-            publicPriceWei_ = _privatePriceWei_startTime__publicPriceWei_publicstartTime_[2];
-            privatePriceWei_ = _privatePriceWei_startTime__publicPriceWei_publicstartTime_[0];
-            salesconf.whiteListStartTime = _privatePriceWei_startTime__publicPriceWei_publicstartTime_[1];
-            salesconf.publicStartTime = _privatePriceWei_startTime__publicPriceWei_publicstartTime_[3];
+            publicPriceWei_ = privPriceStart_pubPriceStart_[2];
+            privatePriceWei_ = privPriceStart_pubPriceStart_[0];
+            salesconf.whiteListStartTime = privPriceStart_pubPriceStart_[1];
+            salesconf.publicStartTime = privPriceStart_pubPriceStart_[3];
             saleIsActive = true;
-            maxMintPerAddress = maxSypplyCollection_maxMintPerAddress_[1];
+            maxMintPerAddress = maxCollMintAddr_[1];
             factory = _factory;
-            emit StartCollectionLog(address(this), msg.sender, _privatePriceWei_startTime__publicPriceWei_publicstartTime_[3], saleIsActive);
-    }
-
-    /*
-    * @notice: to set ERC20 token receiver
-    * @param _admain address is a wallet address of the collection owner.
-    */
-    function setCollector(address _admain) external
-        zeroAddress(_admain) onlyOwner {
-        collector = _admain;
-        emit CollectorLog(_admain) ;
+            emit StartCollectionLog(address(this), _admain, privPriceStart_pubPriceStart_[3], saleIsActive);
     }
 
         /*
@@ -206,7 +194,7 @@ contract CollectionRevenueShare is ERC721, ERC721Enumerable, ERC721URIStorage, O
         uint _fee = calculateFees(cost);
         require(amount >=  cost + _fee, "amount is lower");
         IERC20(paymentContract).safeTransferFrom(msg.sender, factory, _fee);
-        IERC20(paymentContract).safeTransferFrom(msg.sender, collector, cost);
+        IERC20(paymentContract).safeTransferFrom(msg.sender, address(this), amount - _fee);
         safeMint( numTokens);
         iSwopXFactory(factory).notifyCurrencySaleLog(msg.sender, numTokens, paymentContract, cost + _fee);
         emit SaleLog(msg.sender, paymentContract, numTokens, cost + _fee);
@@ -264,8 +252,8 @@ contract CollectionRevenueShare is ERC721, ERC721Enumerable, ERC721URIStorage, O
         SalesConf memory conf = salesconf;
         uint256 tokenId = totalSupply();
         require(numTokens + tokenId <= maxSypplyCollection, "Exceed max supply");
-        uint256 startTimestamp_ = conf.whiteListStartTime;
-        require (timestamp() >= startTimestamp_ , "Time" );
+        uint256 startTimestamp_ = conf.publicStartTime;
+        require (timestamp() <= startTimestamp_ , "Time" );
         uint256 price_ = privatePriceWei_;
         uint256 cost = price_ * numTokens;
         uint256 _fee = calculateFees(cost);
