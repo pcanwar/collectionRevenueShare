@@ -97,7 +97,7 @@ contract CollectionRevenueShare is ERC721, ERC721Enumerable, ERC721URIStorage, O
     */
     function initialize(string [3] calldata nsbURI_, address _admain, address _factory,
     uint256 [2] calldata maxCollMintAddr_, uint256 [4] calldata privPriceStart_pubPriceStart_,
-    address[] calldata payees, uint256[] calldata shares) external virtual initializer  {
+    address[] calldata payees, uint256[] calldata shares, uint96 _feeNumerator) external virtual initializer  {
             require(timestamp() <= privPriceStart_pubPriceStart_[3],"public time sale is not correct " );
             require(privPriceStart_pubPriceStart_[3] >= privPriceStart_pubPriceStart_[1],"public time smaller than end time" );
             require(_admain != address(0));
@@ -106,6 +106,7 @@ contract CollectionRevenueShare is ERC721, ERC721Enumerable, ERC721URIStorage, O
             maxSypplyCollection = maxCollMintAddr_[0];
             _setBaseURI(string(abi.encodePacked(nsbURI_[2], Strings.toHexString(address(this)),"/")));
             __Ownable_init(_admain);
+            _setDefaultRoyalty(_admain, _feeNumerator);
             publicPriceWei_ = privPriceStart_pubPriceStart_[2];
             privatePriceWei_ = privPriceStart_pubPriceStart_[0];
             salesconf.whiteListStartTime = privPriceStart_pubPriceStart_[1];
@@ -174,7 +175,7 @@ contract CollectionRevenueShare is ERC721, ERC721Enumerable, ERC721URIStorage, O
         payable(fees).transfer(_fee);
         safeMint(numTokens);
         iSwopXFactory(factory).notifySaleLog(msg.sender, numTokens, cost + _fee);
-        emit SaleLog(msg.sender, address(0), numTokens, cost + _fee);
+        emit SaleLog(msg.sender, address(this), numTokens, cost + _fee);
     }
 
 

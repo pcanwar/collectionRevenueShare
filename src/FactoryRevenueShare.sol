@@ -15,7 +15,7 @@ contract FactoryRevenueShare is Ownable  {
 
     event NewCollectionLog(address indexed contracts, address indexed creator, address indexed admain, 
     string  [3] nsbURI_,
-    uint256 [2] maxSypplyMintPerAddress, uint256 [4] privatePublicPriceWei, address[] payees, uint256[] shares);
+    uint256 [2] maxSypplyMintPerAddress, uint256 [4] privatePublicPriceWei, address[] payees, uint256[] shares, uint96 feeNumerator);
 
     // SaleLogFactory event if there is sale either private or public sales
     event SaleLogFactory(address indexed collection, address minter, uint256 numOfTokens, uint256 cost);
@@ -59,19 +59,19 @@ contract FactoryRevenueShare is Ownable  {
 
     function createCollection(string [3] calldata nsbURI_, address _admain,
     uint256 [2] calldata maxCollMintAddr_, uint256 [4] calldata privPriceStart_pubPriceStart_,
-    address[] calldata payees, uint256[] calldata shares) external   {
+    address[] calldata payees, uint256[] calldata shares, uint96 _feeNumerator) external   {
         require( maxCollMintAddr_[0] > 0, "It must be nonzero");
         address payable clone = payable(Clones.clone(nftImp));
         CollectionRevenueShare(clone).initialize(
             nsbURI_, _admain, address(this),
-            maxCollMintAddr_,privPriceStart_pubPriceStart_, payees, shares);
+            maxCollMintAddr_,privPriceStart_pubPriceStart_, payees, shares, _feeNumerator);
 
         nftCollection.push(clone);
 
         isMintedCollection[clone] = true;
 
         emit NewCollectionLog(clone, msg.sender,_admain,
-            nsbURI_, maxCollMintAddr_, privPriceStart_pubPriceStart_, payees, shares);
+            nsbURI_, maxCollMintAddr_, privPriceStart_pubPriceStart_, payees, shares, _feeNumerator);
     }
 
 
